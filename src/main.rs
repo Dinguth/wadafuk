@@ -86,7 +86,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         match decode {
             true => print!("{}", meow_to_str(&buffer, dna)?),
-            false => println!("{}", str_to_meow(&buffer, dna)?),
+            false => println!("{}", str_to_meow(&buffer, dna)),
         };
     }
     Ok(())
