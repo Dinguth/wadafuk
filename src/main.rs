@@ -43,13 +43,13 @@ fn meow_to_str(input: &str, dna: &str) -> Result<String, Box<dyn std::error::Err
     for meow in meows {
         let mut byte: u8 = 0;
         for i in 0..4 {
-            let bits = match meow[3-i] as char {
-                M => 0,
-                E => 1,
-                O => 2,
-                W => 3,
-                _ => continue,
-            };
+            let c = meow[3-i] as char;
+            let mut bits = 255u8;
+            for j in 0..4 {
+                if dnachars[j] == c {
+                    bits = j as u8;
+                }
+            }
             byte = (byte << 2) + bits;
         }
         buffer.push(byte as char);
