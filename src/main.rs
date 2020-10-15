@@ -66,7 +66,7 @@ fn meow_to_str(input: &str, dna: &str) -> Result<String, Box<dyn std::error::Err
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("MEOW")
-        .version("0.2.0")
+        .version("0.2.1")
         .arg(Arg::with_name("encode")
             .short("e")
             .long("encode")
