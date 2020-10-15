@@ -12,8 +12,10 @@
  * --------------------
  */
 
-use std::io::{self, Read};
 use clap::{Arg, App};
+use log::{error, warn, info, debug, trace};
+use simplelog::*;
+use std::io::{self, Read};
 
 fn str_to_meow(input: &str, dna: &str) -> String {
     let bytes = input.as_bytes();
@@ -29,6 +31,7 @@ fn str_to_meow(input: &str, dna: &str) -> String {
 }
 
 fn meow_to_str(input: &str, dna: &str) -> Result<String, Box<dyn std::error::Error>> {
+    trace!("input: {}", input);
     let input = input.as_bytes().to_owned();
     let mut dnachars = dna.chars().take(4);
     let M = dnachars.next().unwrap();
@@ -36,11 +39,14 @@ fn meow_to_str(input: &str, dna: &str) -> Result<String, Box<dyn std::error::Err
     let O = dnachars.next().unwrap();
     let W = dnachars.next().unwrap();
     let dnachars = vec![M, E, O, W];
+    trace!("dnachars: {:?}", dnachars);
     let input: Vec<u8> = input.into_iter().filter(|c| dnachars.iter().any(|d| *c == *d as u8)).collect();
     let input = String::from_utf8(input)?;
+    trace!("filtered input: {}", input);
     let mut buffer = String::new();
     let meows = input.as_bytes().chunks_exact(4);
     for meow in meows {
+        trace!("meow: {:?}", meow);
         let mut byte: u8 = 0;
         for i in 0..4 {
             let c = meow[3-i] as char;
@@ -50,6 +56,7 @@ fn meow_to_str(input: &str, dna: &str) -> Result<String, Box<dyn std::error::Err
                     bits = j as u8;
                 }
             }
+            trace!("char: {}, bits: {}", c, bits);
             byte = (byte << 2) + bits;
         }
         buffer.push(byte as char);
@@ -75,7 +82,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("bases")
             .takes_value(true)
             .help("set custom digits (default is MEOW,, dna would be ACGT)"))
+        .arg(Arg::with_name("v")
+            .short("v")
+            .multiple(true)
+            .help("Sets the level of verbosity"))
         .get_matches();
+    let lf = match matches.occurrences_of("v") {
+        0 => LevelFilter::Error,
+        1 => LevelFilter::Warn,
+        2 => LevelFilter::Info,
+        3 => LevelFilter::Debug,
+        _ => LevelFilter::Trace,
+    };
+    let _ = SimpleLogger::init(lf, Config::default());
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer)?;
     // println!("{:?}", buffer.as_bytes());
